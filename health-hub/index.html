@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Hub Build</title>
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#f4f1ea; --ink:#1c1a17; --rust:#b8472f; --muted:#6b655c; --line:#d8d2c6; --panel:#1c1a17;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; overflow:hidden;
+  }
+  .serif{font-family:Georgia,"Times New Roman",serif;}
+  .deck{position:relative; height:100%; width:100%; overflow:hidden;}
+  .slide{
+    position:absolute; inset:0; padding:6vh 8vw; opacity:0; pointer-events:none;
+    transition:opacity .45s ease; display:flex; flex-direction:column; justify-content:center;
+  }
+  .slide.active{opacity:1; pointer-events:auto;}
+  @media (prefers-reduced-motion:reduce){ .slide{transition:none;} }
+  .kicker{
+    display:inline-block; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;
+    letter-spacing:2px; text-transform:uppercase; color:var(--rust); font-weight:700; margin-bottom:14px;
+  }
+  .kicker.bar{background:var(--rust); color:#fff; padding:6px 12px; letter-spacing:2px;}
+  h1.title{font-size:clamp(30px,5.6vw,68px); line-height:1.02; margin:0 0 10px; font-weight:700; letter-spacing:-.5px; text-wrap:balance;}
+  h1.title em{color:var(--rust); font-style:italic;}
+  .rule{width:64px; height:4px; background:var(--rust); margin:14px 0 22px;}
+  .sub{font-size:clamp(15px,1.6vw,21px); color:var(--muted); max-width:52ch; margin:0;}
+  .meta-row{display:flex; gap:46px; margin-top:auto; padding-top:30px; flex-wrap:wrap;}
+  .meta .l{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase;}
+  .meta .v{font-weight:700; font-size:15px; margin-top:3px;}
+  .ghost{
+    position:absolute; right:5vw; top:50%; transform:translateY(-50%);
+    font-family:Georgia,serif; font-weight:700; font-size:34vh; color:rgba(255,255,255,.06); line-height:1; user-select:none;
+  }
+  .panel{
+    position:absolute; top:0; right:0; height:100%; width:34%;
+    background:var(--panel); clip-path:polygon(28% 0,100% 0,100% 100%,0% 100%); z-index:0;
+  }
+  .slide > *{position:relative; z-index:1;}
+  ul.points{list-style:none; padding:0; margin:6px 0 0; max-width:64ch;}
+  ul.points li{padding:12px 0; border-bottom:1px solid var(--line); font-size:clamp(14px,1.45vw,19px);}
+  ul.points li:last-child{border-bottom:none;}
+  ul.points li strong{font-weight:700;}
+  .note{margin-top:18px; font-size:13.5px; color:var(--muted);}
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:8px; max-width:100ch;}
+  .cards.four{grid-template-columns:repeat(4,1fr); max-width:120ch;}
+  .cards.two{grid-template-columns:repeat(2,1fr); max-width:90ch;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px;}
+  .card .cl{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--rust); font-weight:700;}
+  .card .cn{font-family:Georgia,serif; font-size:18px; font-weight:700; margin:6px 0 6px; line-height:1.2;}
+  .card .cd{font-size:13.5px; color:var(--muted);}
+  .card.dark{background:var(--panel); color:#e9e4da; border-color:var(--panel);}
+  .card.dark .cd{color:#b9b2a6;}
+  .quote{font-family:Georgia,serif; font-size:clamp(18px,2.2vw,30px); line-height:1.25; max-width:34ch; margin:6px 0 18px; font-style:italic;}
+  .tags{margin-top:20px;}
+  .tag{display:inline-block; font-size:13px; background:#ece8df; color:#5a554c; border-radius:20px; padding:5px 12px; margin:4px 6px 4px 0;}
+  .tag.live{background:var(--rust); color:#fff; font-weight:700;}
+  .rules{display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; max-width:110ch; margin-top:6px;}
+  .rl{padding:12px 0; border-bottom:1px solid var(--line);}
+  .rl .rh{font-family:Georgia,serif; font-weight:700; font-size:clamp(15px,1.5vw,20px); line-height:1.2;}
+  .rl .rd{font-size:13.5px; color:var(--muted); margin-top:4px;}
+  .nav{
+    position:fixed; left:50%; bottom:calc(26px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
+    display:flex; align-items:center; gap:14px; background:#15130f; color:#e9e4da;
+    padding:9px 16px; border-radius:999px; z-index:50; box-shadow:0 6px 24px rgba(0,0,0,.18);
+  }
+  .nav button{background:none; border:none; color:#e9e4da; font-size:18px; cursor:pointer; padding:2px 6px; line-height:1; border-radius:6px;}
+  .nav button:hover{background:rgba(255,255,255,.12);}
+  .nav button:focus-visible{outline:2px solid var(--rust); outline-offset:2px;}
+  .nav button:disabled{opacity:.3; cursor:default;}
+  .dots{display:flex; gap:7px;}
+  .dot{width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.32); cursor:pointer;}
+  .dot.on{background:var(--rust);}
+  .count{font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#b9b2a6; min-width:48px; text-align:center;}
+  .hint{position:fixed; right:16px; bottom:30px; font-size:11px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; z-index:40;}
+  @media (max-width:900px){
+    .cards,.cards.four{grid-template-columns:1fr 1fr;}
+    .rules{grid-template-columns:1fr;}
+  }
+  @media (max-width:760px){
+    .cards,.cards.four,.cards.two{grid-template-columns:1fr;}
+    .panel,.ghost{display:none;}
+    .slide{padding:5vh 16px; justify-content:flex-start; overflow-y:auto;}
+    .meta-row{gap:24px;}
+    .hint{display:none;}
+    .card.dark{background:#fff; color:var(--ink); border-color:var(--line);}
+    .card.dark .cd{color:var(--muted);}
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 1 TITLE -->
+  <section class="slide active">
+    <div class="panel"></div><div class="ghost">H</div>
+    <span class="kicker bar">AI Peer Group · September 2026</span>
+    <h1 class="title serif">Managing an AI<br>like a <em>contractor</em></h1>
+    <div class="rule"></div>
+    <p class="sub">A private health site, built with Claude in twelve days. Not about the plan. About how the work got specified, graded, and kept honest.</p>
+    <div class="meta-row">
+      <div class="meta"><div class="l">Presenter</div><div class="v">Jeb Morrison</div></div>
+      <div class="meta"><div class="l">Built</div><div class="v">Sep 3 to 15, 2026</div></div>
+      <div class="meta"><div class="l">Stack</div><div class="v">Python, JSON, git, Render</div></div>
+      <div class="meta"><div class="l">Format</div><div class="v">Slides, then live site</div></div>
+    </div>
+  </section>
+
+  <!-- 2 WHY -->
+  <section class="slide">
+    <span class="kicker">The setup</span>
+    <h1 class="title serif">Personal software, <em>for real</em></h1>
+    <div class="rule"></div>
+    <ul class="points">
+      <li><strong>The problem:</strong> my training and wellness plan lived in Word docs that went stale the day I shared them. I wanted one private site, phone-first, where changing a weight means changing a number.</li>
+      <li><strong>The builder:</strong> in August I could not have told you how GitHub works. Today there is a git repo, a deploy pipeline, twenty pages, and four test suites.</li>
+      <li><strong>The claim:</strong> the code is not the interesting part. The interesting part is the management system I ended up running on the AI.</li>
+      <li><strong>Al's argument from Session 4,</strong> tested: is personal software worth it when you're not a developer?</li>
+    </ul>
+    <div class="tags">
+      <span class="tag live">Live</span>
+      <span class="tag">The site on a phone-sized window, signed in</span>
+      <span class="tag">Change a weight, watch the pages rebuild</span>
+    </div>
+  </section>
+
+  <!-- 3 OWNERSHIP -->
+  <section class="slide">
+    <span class="kicker">Pattern 1 · Ownership</span>
+    <h1 class="title serif">Separate what's mine from what the AI <em>writes</em></h1>
+    <div class="rule"></div>
+    <p class="quote">"The number is the datum. The phrasing is the template."</p>
+    <div class="cards">
+      <div class="card dark"><div class="cl">Mine</div><div class="cn">The data</div><div class="cd">Sets, reps, loads, the schedule, a workout log that only ever appends. Bare numbers, no units, no prose. Lives on a disk I own.</div></div>
+      <div class="card"><div class="cl">The AI's</div><div class="cn">Everything else</div><div class="cd">The renderer, the templates, the checks, the editor. It can rewrite every page from scratch without touching one of my numbers.</div></div>
+      <div class="card"><div class="cl">The enforcement</div><div class="cn">A rule that stops the build</div><div class="cd">Put a unit inside a value and the build refuses. Type a total by hand instead of deriving it and a test fails.</div></div>
+    </div>
+    <p class="note">Why it matters: the AI can be wrong, slow, or replaced. My data survives all three.</p>
+  </section>
+
+  <!-- 4 RUBRIC -->
+  <section class="slide">
+    <span class="kicker">Pattern 2 · Specification</span>
+    <h1 class="title serif">Write the rubric <em>before</em> the code</h1>
+    <div class="rule"></div>
+    <ul class="points">
+      <li><strong>Every stage starts with a written rubric.</strong> MUST items are pass or fail. One MUST failure fails the whole stage, no matter how good the rest is. SHOULD items are scored but never block.</li>
+      <li><strong>Non-scope is spelled out.</strong> "No backend, no editor, no database. A submission that starts building any of them fails." The AI's favorite move is to do more than asked.</li>
+      <li><strong>The first refactor had one criterion:</strong> byte-identical output before and after. "It looked wrong so I fixed it" is a separate change and does not belong in this stage.</li>
+      <li><strong>Refusal is allowed, in writing.</strong> A SHOULD can be declined with a reason. Silent omission cannot.</li>
+    </ul>
+  </section>
+
+  <!-- 5 GRADERS -->
+  <section class="slide">
+    <span class="kicker">Pattern 3 · Review</span>
+    <h1 class="title serif">Four hostile <em>graders</em></h1>
+    <div class="rule"></div>
+    <p class="sub" style="max-width:70ch;">Each round, the AI builds, then plays four adversarial reviewers against its own work. Each has a veto in its own lane. Their job is to find what's wrong, not confirm what's right.</p>
+    <div class="cards four" style="margin-top:18px;">
+      <div class="card"><div class="cl">Usability</div><div class="cn">Me at 6am, on a phone, mid-set, cold hands</div><div class="cd">Can I find today's protocol in one tap? Log a set without losing my place? Is anything important below three scrolls?</div></div>
+      <div class="card"><div class="cl">Style</div><div class="cn">A designer who has seen 10,000 dark dashboards</div><div class="cd">Does the density read as considered or dumped? Does anything look like a default?</div></div>
+      <div class="card"><div class="cl">Domain skeptic</div><div class="cn">A coach who thinks most of this is expensive urine</div><div class="cd">Is every claim traceable to the source sheet? Is a C-grade claim presented with the confidence of an A?</div></div>
+      <div class="card"><div class="cl">Domain expert</div><div class="cn">Someone who knows the literature's failure modes</div><div class="cd">Is animal data dressed as human data? Can a reader mistake an intention for a practice?</div></div>
+    </div>
+    <div class="tags">
+      <span class="tag">Minimum five rounds. It ran eleven.</span>
+      <span class="tag">A grader that reports nothing is a failed grader, not a passed build</span>
+      <span class="tag">Findings carry forward until closed by a fix or a refusal the grader accepts</span>
+    </div>
+  </section>
+
+  <!-- 6 RUBRIC GROWS -->
+  <section class="slide">
+    <span class="kicker">Pattern 4 · Learning</span>
+    <h1 class="title serif">The rubric is a <em>deliverable</em> too</h1>
+    <div class="rule"></div>
+    <p class="sub" style="max-width:70ch;">Anything a grader found that the rubric did not anticipate got added to the rubric, not just fixed. Some of the rules it wrote about itself:</p>
+    <div class="rules" style="margin-top:14px;">
+      <div class="rl"><div class="rh">A test that asserts presence is not a safety test.</div><div class="rd">132 safety flags could be inverted without changing a byte of any page or failing any check. Tests now assert consequences.</div></div>
+      <div class="rl"><div class="rh">Verification scope is part of the claim.</div><div class="rd">A tool printed CLEAN over a file it had never looked at. Every check now names what it read.</div></div>
+      <div class="rl"><div class="rh">A sweep that cannot fail anything is not a check.</div><div class="rd">A full scan sat behind a flag nothing ever passed, and its result never fed the verdict.</div></div>
+      <div class="rl"><div class="rh">"Did this resolve" needs a partner: "into what."</div><div class="rd">A placeholder resolved into garbage and shipped on every page for a full round, inside the fix meant to prevent it.</div></div>
+      <div class="rl"><div class="rh">Every absence is named, or none is.</div><div class="rd">Four gaps were labeled "not recorded." The fifth and largest was silent, so readers assumed a blank meant something.</div></div>
+      <div class="rl"><div class="rh">The deploy that is tested is the one that actually happens.</div><div class="rd">The test booted onto an empty disk, the one case that cannot fail. Real deploys boot onto yesterday's data.</div></div>
+    </div>
+  </section>
+
+  <!-- 7 TRUST -->
+  <section class="slide">
+    <span class="kicker">Pattern 5 · Boundaries</span>
+    <h1 class="title serif">Lines the AI can't talk its way <em>past</em></h1>
+    <div class="rule"></div>
+    <div class="cards">
+      <div class="card"><div class="cl">Two sites, one source</div><div class="cn">Private and public are built separately</div><div class="cd">The private site has everything, behind Google sign-in. The public subset was never rendered with private data. Nothing was filtered out, because it was never put in.</div></div>
+      <div class="card"><div class="cl">The scanner</div><div class="cn">Publish refuses if anything leaks</div><div class="cd">Every brand, dose, and product name is a blocked term, with an adversarial test per term. If the scan objects, nothing moves.</div></div>
+      <div class="card"><div class="cl">Provenance</div><div class="cn">Every number must prove itself</div><div class="cd">A tool perturbs each value in the data and checks the page moved. A number on a page with no source in the data fails the build.</div></div>
+    </div>
+    <div class="tags">
+      <span class="tag live">Live</span>
+      <span class="tag">Public site next to private site</span>
+      <span class="tag">The scanner catching a planted term</span>
+      <span class="tag">Standing rule: secrets never go into a chat window</span>
+    </div>
+  </section>
+
+  <!-- 8 WHAT BROKE -->
+  <section class="slide">
+    <div class="panel"></div><div class="ghost">!</div>
+    <span class="kicker">Honest round</span>
+    <h1 class="title serif">What broke <em>anyway</em></h1>
+    <div class="rule"></div>
+    <ul class="points">
+      <li><strong>One failed deploy, site down.</strong> My data file also held program structure. New code needed a field the live file could not have. The test suite had no idea, because it only tested a fresh install.</li>
+      <li><strong>One bug shipped inside its own fix.</strong> A CSS escape rendered as junk on every page for a full round, and the check that should have caught it only asked whether the placeholder resolved.</li>
+      <li><strong>The pattern:</strong> every miss was a check that looked like a check and could not fail. The graders found what I did not know to look for. Nothing found what nobody was looking for.</li>
+      <li><strong>The one thing still typed by hand:</strong> "82 minutes door to door." The build catches an impossible figure, not a merely wrong one.</li>
+    </ul>
+  </section>
+
+  <!-- 9 DURABILITY -->
+  <section class="slide">
+    <span class="kicker">The lens · Does it last?</span>
+    <h1 class="title serif">What survives a <em>cheaper model</em></h1>
+    <div class="rule"></div>
+    <div class="cards two">
+      <div class="card"><div class="cl">Gets stronger</div><div class="cn">The structure</div><div class="cd">Data I own, a rubric in plain English, graders described as people, checks that must be able to fail. None of it cares which model runs it. Cheaper tokens mean more rounds, not fewer.</div></div>
+      <div class="card"><div class="cl">Stays human</div><div class="cn">The judgment</div><div class="cd">Deciding what is a MUST. Writing the non-scope. Being the 6am usability grader. Knowing which refusal to accept. The AI did not write the rubric's first draft well.</div></div>
+    </div>
+    <div class="tags" style="margin-top:26px;">
+      <span class="tag">For the room: what's your equivalent of a hostile grader?</span>
+      <span class="tag">Where do you let the AI mark its own homework?</span>
+      <span class="tag">Is a rubric overkill for a one-person tool, or the only reason it worked?</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous">&larr;</button>
+  <div class="dots" id="dots"></div>
+  <span class="count" id="count">1 / 9</span>
+  <button id="next" aria-label="Next">&rarr;</button>
+</div>
+<div class="hint">← → or space to advance</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('dots');
+  const count = document.getElementById('count');
+  const prevB = document.getElementById('prev');
+  const nextB = document.getElementById('next');
+  let i = 0;
+  slides.forEach((_, n) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (n === 0 ? ' on' : '');
+    d.addEventListener('click', () => go(n));
+    dotsWrap.appendChild(d);
+  });
+  const dots = Array.from(document.querySelectorAll('.dot'));
+  function go(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    count.textContent = (i + 1) + ' / ' + slides.length;
+    prevB.disabled = (i === 0);
+    nextB.disabled = (i === slides.length - 1);
+  }
+  prevB.addEventListener('click', () => go(i - 1));
+  nextB.addEventListener('click', () => go(i + 1));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){ e.preventDefault(); go(i + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(i - 1); }
+    if (e.key === 'Home'){ go(0); } if (e.key === 'End'){ go(slides.length - 1); }
+  });
+  let x0 = null;
+  document.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50){ go(i + (dx < 0 ? 1 : -1)); }
+    x0 = null;
+  }, {passive:true});
+  go(0);
+</script>
+</body>
+</html>
