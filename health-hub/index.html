@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Health Hub Build</title>
+<title>Evidence and the Experimental Group</title>
 <style>
   :root{
     color-scheme: light;
@@ -19,56 +19,48 @@
   .serif{font-family:Georgia,"Times New Roman",serif;}
   .deck{position:relative; height:100%; width:100%; overflow:hidden;}
   .slide{
-    position:absolute; inset:0; padding:6vh 8vw; opacity:0; pointer-events:none;
-    transition:opacity .45s ease; display:flex; flex-direction:column; justify-content:center;
+    position:absolute; inset:0; padding:5vh 7vw 14vh; opacity:0; pointer-events:none;
+    transition:opacity .35s ease; overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .slide.active{opacity:1; pointer-events:auto;}
+  .slide .inner{max-width:1100px; margin:0 auto;}
   @media (prefers-reduced-motion:reduce){ .slide{transition:none;} }
   .kicker{
     display:inline-block; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px;
-    letter-spacing:2px; text-transform:uppercase; color:var(--rust); font-weight:700; margin-bottom:14px;
+    letter-spacing:2px; text-transform:uppercase; color:var(--rust); font-weight:700; margin-bottom:12px;
   }
-  .kicker.bar{background:var(--rust); color:#fff; padding:6px 12px; letter-spacing:2px;}
-  h1.title{font-size:clamp(30px,5.6vw,68px); line-height:1.02; margin:0 0 10px; font-weight:700; letter-spacing:-.5px; text-wrap:balance;}
+  .kicker.bar{background:var(--rust); color:#fff; padding:6px 12px;}
+  h1.title{font-size:clamp(26px,4.4vw,54px); line-height:1.08; margin:0 0 8px; font-weight:700; letter-spacing:-.4px; text-wrap:balance; max-width:22ch;}
+  h1.title.wide{max-width:30ch;}
   h1.title em{color:var(--rust); font-style:italic;}
-  .rule{width:64px; height:4px; background:var(--rust); margin:14px 0 22px;}
-  .sub{font-size:clamp(15px,1.6vw,21px); color:var(--muted); max-width:52ch; margin:0;}
-  .meta-row{display:flex; gap:46px; margin-top:auto; padding-top:30px; flex-wrap:wrap;}
+  .rule{width:64px; height:4px; background:var(--rust); margin:12px 0 18px;}
+  .sub{font-size:clamp(15px,1.5vw,20px); color:var(--muted); max-width:56ch; margin:0;}
+  .meta-row{display:flex; gap:40px; margin-top:34px; flex-wrap:wrap;}
   .meta .l{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:1px; color:var(--muted); text-transform:uppercase;}
   .meta .v{font-weight:700; font-size:15px; margin-top:3px;}
-  .ghost{
-    position:absolute; right:5vw; top:50%; transform:translateY(-50%);
-    font-family:Georgia,serif; font-weight:700; font-size:34vh; color:rgba(255,255,255,.06); line-height:1; user-select:none;
-  }
-  .panel{
-    position:absolute; top:0; right:0; height:100%; width:34%;
-    background:var(--panel); clip-path:polygon(28% 0,100% 0,100% 100%,0% 100%); z-index:0;
-  }
-  .slide > *{position:relative; z-index:1;}
-  ul.points{list-style:none; padding:0; margin:6px 0 0; max-width:64ch;}
-  ul.points li{padding:12px 0; border-bottom:1px solid var(--line); font-size:clamp(14px,1.45vw,19px);}
+  ul.points{list-style:none; padding:0; margin:4px 0 0; max-width:66ch;}
+  ul.points li{padding:11px 0; border-bottom:1px solid var(--line); font-size:clamp(14px,1.35vw,18px);}
   ul.points li:last-child{border-bottom:none;}
   ul.points li strong{font-weight:700;}
-  .note{margin-top:18px; font-size:13.5px; color:var(--muted);}
-  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:8px; max-width:100ch;}
-  .cards.four{grid-template-columns:repeat(4,1fr); max-width:120ch;}
-  .cards.two{grid-template-columns:repeat(2,1fr); max-width:90ch;}
-  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px;}
+  ol.rules{list-style:none; padding:0; margin:6px 0 0; max-width:70ch; counter-reset:r;}
+  ol.rules li{counter-increment:r; display:grid; grid-template-columns:44px 1fr; gap:14px; align-items:baseline; padding:12px 0; border-bottom:1px solid var(--line); font-size:clamp(15px,1.5vw,20px);}
+  ol.rules li::before{content:counter(r); font-family:Georgia,serif; font-size:26px; color:var(--rust); line-height:1;}
+  ol.rules li:last-child{border-bottom:none;}
+  .note{margin-top:16px; font-size:13.5px; color:var(--muted); max-width:70ch;}
+  .cards{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:6px;}
+  .cards.four{grid-template-columns:repeat(4,1fr);}
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
   .card .cl{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--rust); font-weight:700;}
-  .card .cn{font-family:Georgia,serif; font-size:18px; font-weight:700; margin:6px 0 6px; line-height:1.2;}
+  .card .cn{font-family:Georgia,serif; font-size:17px; font-weight:700; margin:6px 0 6px; line-height:1.2;}
   .card .cd{font-size:13.5px; color:var(--muted);}
   .card.dark{background:var(--panel); color:#e9e4da; border-color:var(--panel);}
   .card.dark .cd{color:#b9b2a6;}
-  .quote{font-family:Georgia,serif; font-size:clamp(18px,2.2vw,30px); line-height:1.25; max-width:34ch; margin:6px 0 18px; font-style:italic;}
-  .tags{margin-top:20px;}
+  .tags{margin-top:18px;}
   .tag{display:inline-block; font-size:13px; background:#ece8df; color:#5a554c; border-radius:20px; padding:5px 12px; margin:4px 6px 4px 0;}
   .tag.live{background:var(--rust); color:#fff; font-weight:700;}
-  .rules{display:grid; grid-template-columns:1fr 1fr; gap:14px 28px; max-width:110ch; margin-top:6px;}
-  .rl{padding:12px 0; border-bottom:1px solid var(--line);}
-  .rl .rh{font-family:Georgia,serif; font-weight:700; font-size:clamp(15px,1.5vw,20px); line-height:1.2;}
-  .rl .rd{font-size:13.5px; color:var(--muted); margin-top:4px;}
+  .foot{margin-top:18px; padding-top:12px; border-top:1px solid var(--line); font-size:13.5px; color:var(--muted); max-width:80ch;}
   .nav{
-    position:fixed; left:50%; bottom:calc(26px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
+    position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%);
     display:flex; align-items:center; gap:14px; background:#15130f; color:#e9e4da;
     padding:9px 16px; border-radius:999px; z-index:50; box-shadow:0 6px 24px rgba(0,0,0,.18);
   }
@@ -80,19 +72,14 @@
   .dot{width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.32); cursor:pointer;}
   .dot.on{background:var(--rust);}
   .count{font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#b9b2a6; min-width:48px; text-align:center;}
-  .hint{position:fixed; right:16px; bottom:30px; font-size:11px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; z-index:40;}
-  @media (max-width:900px){
-    .cards,.cards.four{grid-template-columns:1fr 1fr;}
-    .rules{grid-template-columns:1fr;}
-  }
-  @media (max-width:760px){
-    .cards,.cards.four,.cards.two{grid-template-columns:1fr;}
-    .panel,.ghost{display:none;}
-    .slide{padding:5vh 16px; justify-content:flex-start; overflow-y:auto;}
-    .meta-row{gap:24px;}
+  .hint{position:fixed; right:16px; bottom:26px; font-size:11px; color:var(--muted); font-family:ui-monospace,Menlo,monospace; z-index:40;}
+  @media (max-width:980px){ .cards,.cards.four{grid-template-columns:1fr 1fr;} }
+  @media (max-width:640px){
+    .cards,.cards.four{grid-template-columns:1fr;}
+    .slide{padding:24px 16px 120px;}
+    .meta-row{gap:22px;}
     .hint{display:none;}
-    .card.dark{background:#fff; color:var(--ink); border-color:var(--line);}
-    .card.dark .cd{color:var(--muted);}
+    h1.title{max-width:none;}
   }
 </style>
 </head>
@@ -101,157 +88,158 @@
 <div class="deck" id="deck">
 
   <!-- 1 TITLE -->
-  <section class="slide active">
-    <div class="panel"></div><div class="ghost">H</div>
+  <section class="slide active"><div class="inner">
     <span class="kicker bar">AI Peer Group · September 2026</span>
-    <h1 class="title serif">Managing an AI<br>like a <em>contractor</em></h1>
+    <h1 class="title serif">Evidence, and the <em>experimental group</em></h1>
     <div class="rule"></div>
-    <p class="sub">A private health site, built with Claude in twelve days. Not about the plan. About how the work got specified, graded, and kept honest.</p>
+    <p class="sub">One person's health system, not a protocol. How the choices got made, what the AI was allowed to check, and where the human stays in charge.</p>
     <div class="meta-row">
       <div class="meta"><div class="l">Presenter</div><div class="v">Jeb Morrison</div></div>
-      <div class="meta"><div class="l">Built</div><div class="v">Sep 3 to 15, 2026</div></div>
-      <div class="meta"><div class="l">Stack</div><div class="v">Python, JSON, git, Render</div></div>
-      <div class="meta"><div class="l">Format</div><div class="v">Slides, then live site</div></div>
+      <div class="meta"><div class="l">Format</div><div class="v">Slides, then the live site</div></div>
+      <div class="meta"><div class="l">Caveat</div><div class="v">The health choices are mine. The method travels.</div></div>
     </div>
-  </section>
+  </div></section>
 
-  <!-- 2 WHY -->
-  <section class="slide">
-    <span class="kicker">The setup</span>
-    <h1 class="title serif">Personal software, <em>for real</em></h1>
+  <!-- 2 PATTERN -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">The pattern</span>
+    <h1 class="title serif">Five rules. The rest of the deck is the <em>evidence</em>.</h1>
+    <div class="rule"></div>
+    <ol class="rules">
+      <li>Fix the weekly time budget. Then the only decision is what a rule cuts.</li>
+      <li>Treat the inputs as separate budgets. Cardio does not buy back sleep.</li>
+      <li>Grade every claim, and put a number on the share that is a guess.</li>
+      <li>Write the reversal condition before making the change.</li>
+      <li>Use AI as a hostile reviewer of the whole system. It proposes; I decide.</li>
+    </ol>
+  </div></section>
+
+  <!-- 3 SEVEN BUDGETS -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Rule 2 · Separate budgets</span>
+    <h1 class="title serif wide">Seven inputs that don't <em>trade off</em> against each other</h1>
+    <div class="rule"></div>
+    <div class="cards four">
+      <div class="card"><div class="cl">Strength</div><div class="cn">Three sessions a week</div><div class="cd">Blocks tiered so the cut is pre-decided.</div></div>
+      <div class="card"><div class="cl">Cardio</div><div class="cn">Hard, short, easy</div><div class="cd">One hard interval session, one short all-out session, one easy ride.</div></div>
+      <div class="card"><div class="cl">Mobility</div><div class="cn">Before every lift</div><div class="cd">Fifteen minutes, plus a longer Sunday session.</div></div>
+      <div class="card"><div class="cl">Sleep</div><div class="cn">Its own targets</div><div class="cd">Added in September. It had none before.</div></div>
+      <div class="card"><div class="cl">Nutrition</div><div class="cn">Protein first</div><div class="cd">A feeding window, and a plateau rule: cut calories only when weight stalls, not by default.</div></div>
+      <div class="card"><div class="cl">Supplements</div><div class="cn">Every row graded</div><div class="cd">A few twelve-week experimental slots. Everything else is core or cut.</div></div>
+      <div class="card"><div class="cl">Recovery</div><div class="cn">Heat, cold, light</div><div class="cd">Sauna most days. Cold only on cardio days, since small studies suggest post-lift cold blunts the muscle-growth response.</div></div>
+      <div class="card dark"><div class="cl">The budget</div><div class="cn">About seventeen tracked hours</div><div class="cd">None of these substitutes for another.</div></div>
+    </div>
+    <div class="tags"><span class="tag live">Live</span><span class="tag">The Today tab</span></div>
+  </div></section>
+
+  <!-- 4 STRENGTH -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Rule 1 · Strength</span>
+    <h1 class="title serif wide">Pre-decide the cut, so nothing is negotiated at <em>6am</em></h1>
     <div class="rule"></div>
     <ul class="points">
-      <li><strong>The problem:</strong> my training and wellness plan lived in Word docs that went stale the day I shared them. I wanted one private site, phone-first, where changing a weight means changing a number.</li>
-      <li><strong>The builder:</strong> in August I could not have told you how GitHub works. Today there is a git repo, a deploy pipeline, twenty pages, and four test suites.</li>
-      <li><strong>The claim:</strong> the code is not the interesting part. The interesting part is the management system I ended up running on the AI.</li>
-      <li><strong>Al's argument from Session 4,</strong> tested: is personal software worth it when you're not a developer?</li>
+      <li><strong>Every session reads in priority order.</strong> The last block is the first thing to cut. The arithmetic is on the page.</li>
+      <li><strong>The wearable's recovery score drives the cut.</strong> Amber: drop the last block. Red: walk only.</li>
+      <li><strong>Deload every fourth week, or early on triggers:</strong> a run of red days, a sustained drop in heart-rate variability against a monthly baseline, or a missed rep on the main lift of the day.</li>
+      <li><strong>Control before power.</strong> New movement patterns run two weeks before the explosive work is added. If something flares, you have a candidate cause, not proof.</li>
     </ul>
-    <div class="tags">
-      <span class="tag live">Live</span>
-      <span class="tag">The site on a phone-sized window, signed in</span>
-      <span class="tag">Change a weight, watch the pages rebuild</span>
-    </div>
-  </section>
+    <div class="tags"><span class="tag live">Live</span><span class="tag">The squat-day run sheet</span></div>
+  </div></section>
 
-  <!-- 3 OWNERSHIP -->
-  <section class="slide">
-    <span class="kicker">Pattern 1 · Ownership</span>
-    <h1 class="title serif">Separate what's mine from what the AI <em>writes</em></h1>
+  <!-- 5 CARDIO -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Rule 4 · Cardio</span>
+    <h1 class="title serif">Write the reversal <em>before</em> the change</h1>
     <div class="rule"></div>
-    <p class="quote">"The number is the datum. The phrasing is the template."</p>
+    <ul class="points">
+      <li><strong>The change:</strong> in September, Friday stopped being a second hard interval session and became an easy ride (zone 2: a pace you can hold a conversation at).</li>
+      <li><strong>Why:</strong> the plan had no easy day, and the AI recovery review flagged that as the bigger gap than anything in the hard sessions. Four hard sessions a week became three.</li>
+      <li><strong>The reversal is pre-written on the page:</strong> if the next fitness test shows power down past a threshold set in advance, Friday goes back to intervals.</li>
+      <li><strong>Why protect this budget at all:</strong> higher aerobic fitness is associated with living longer in population data. A reason to keep the hours. Not a guarantee about one Friday ride.</li>
+    </ul>
+  </div></section>
+
+  <!-- 6 TAGS -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Rules that can fail</span>
+    <h1 class="title serif wide">Tag once, let the rules read the tags, test that they can <em>fail</em></h1>
+    <div class="rule"></div>
+    <ul class="points">
+      <li><strong>Every exercise in the catalogue carries warning tags:</strong> which joint it loads, which range it goes through.</li>
+      <li><strong>A flare rule reads the tags.</strong> Tight: substitute the one lift, keep the session. Sore: the unloaded half only. Symptomatic: everything with that tag comes out, across lift days and mobility work. The skip list is computed when the site is built, not maintained by hand. These are my rules, reviewed with my clinician, not physio advice.</li>
+      <li><strong>The test that mattered:</strong> every tag could be inverted without changing a page. The tests only checked the tags existed. Now they assert consequences: flip one tag, and a named exercise must leave a named page, or the build fails.</li>
+    </ul>
+    <div class="tags"><span class="tag live">Live</span><span class="tag">The mobility page, one rule expanded</span></div>
+  </div></section>
+
+  <!-- 7 EVIDENCE -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Rule 3 · Evidence versus the experimental group</span>
+    <h1 class="title serif">Put a number on the <em>guesses</em></h1>
+    <div class="rule"></div>
+    <ul class="points">
+      <li><strong>Every supplement row carries a grade from my own inventory,</strong> A to D. The AI's job was to check the citations behind the grades and propose downgrades where a grade outran its evidence. I applied the ones I agreed with.</li>
+      <li><strong>Stated head-on:</strong> about a third of supplement spend sits in the two thinnest tiers. That is the size of the bet on being in the experimental group.</li>
+      <li><strong>The slot policy:</strong> a small number of twelve-week experimental slots, each with a marker written down in advance (a measured number, a test result, or a logged felt effect) that would show it worked. One variable per block.</li>
+      <li><strong>A removed-items log keeps the reasoning,</strong> so it survives the person who remembers it. Not yet exercised.</li>
+      <li><strong>What a study of one person can do:</strong> produce hypotheses and stop conditions, not evidence. Joining the experimental group means accepting that, and my clinician sees the same list.</li>
+    </ul>
+    <div class="foot">Grades: A strong human evidence · B human signal plus mechanism · C works in theory or in a dish, thin human data · D speculative.</div>
+    <div class="tags"><span class="tag live">Live</span><span class="tag">The supplements page header</span></div>
+  </div></section>
+
+  <!-- 8 SLEEP -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Sleep</span>
+    <h1 class="title serif wide">When two instruments disagree, ask whether they measure the <em>same thing</em></h1>
+    <div class="rule"></div>
+    <ul class="points">
+      <li><strong>The AI review flagged an inversion:</strong> one wearable's sleeping heart rate sat above a second device's awake resting rate.</li>
+      <li><strong>The catch:</strong> the review had compared unlike quantities. One number is a weighted nightly average, the other a daytime floor. An average sits above a floor for anyone. The error is on the page next to the original claim.</li>
+      <li><strong>What remains is smaller and untested:</strong> a slow drift in one series over six months. That is a hypothesis, labelled as one.</li>
+      <li><strong>Next:</strong> four weeks of tagged nights (sauna, alcohol, late activity). They will produce hypotheses to check, not thresholds.</li>
+    </ul>
+  </div></section>
+
+  <!-- 9 AI -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">Rule 5 · What the AI was for, and was not</span>
+    <h1 class="title serif">Reviewer, auditor, gatekeeper. <em>Never author.</em></h1>
+    <div class="rule"></div>
     <div class="cards">
-      <div class="card dark"><div class="cl">Mine</div><div class="cn">The data</div><div class="cd">Sets, reps, loads, the schedule, a workout log that only ever appends. Bare numbers, no units, no prose. Lives on a disk I own.</div></div>
-      <div class="card"><div class="cl">The AI's</div><div class="cn">Everything else</div><div class="cd">The renderer, the templates, the checks, the editor. It can rewrite every page from scratch without touching one of my numbers.</div></div>
-      <div class="card"><div class="cl">The enforcement</div><div class="cn">A rule that stops the build</div><div class="cd">Put a unit inside a value and the build refuses. Type a total by hand instead of deriving it and a test fails.</div></div>
+      <div class="card"><div class="cl">Reviewer</div><div class="cn">The whole system at once</div><div class="cd">Three prompted personas of the same model, none a clinician: an experimental-but-data-driven scientist, an efficiency expert holding weekly time constant, a recovery specialist. Fourteen proposals came out. I accepted, rejected or modified each one.</div></div>
+      <div class="card"><div class="cl">Auditor</div><div class="cn">No floating numbers</div><div class="cd">Every figure on every page must trace to the data or carry a written reason. A hand-typed total fails the build. Data integrity, not decision quality.</div></div>
+      <div class="card"><div class="cl">Gatekeeper</div><div class="cn">The privacy line</div><div class="cd">The public site is built from a copy with the private rows already removed. A scanner sits between the build and anything public and refuses if it objects.</div></div>
     </div>
-    <p class="note">Why it matters: the AI can be wrong, slow, or replaced. My data survives all three.</p>
-  </section>
-
-  <!-- 4 RUBRIC -->
-  <section class="slide">
-    <span class="kicker">Pattern 2 · Specification</span>
-    <h1 class="title serif">Write the rubric <em>before</em> the code</h1>
-    <div class="rule"></div>
-    <ul class="points">
-      <li><strong>Every stage starts with a written rubric.</strong> MUST items are pass or fail. One MUST failure fails the whole stage, no matter how good the rest is. SHOULD items are scored but never block.</li>
-      <li><strong>Non-scope is spelled out.</strong> "No backend, no editor, no database. A submission that starts building any of them fails." The AI's favorite move is to do more than asked.</li>
-      <li><strong>The first refactor had one criterion:</strong> byte-identical output before and after. "It looked wrong so I fixed it" is a separate change and does not belong in this stage.</li>
-      <li><strong>Refusal is allowed, in writing.</strong> A SHOULD can be declined with a reason. Silent omission cannot.</li>
+    <ul class="points" style="margin-top:14px;">
+      <li><strong>What it got wrong:</strong> one reviewer's proposed schedule got written into the data as what I do. Walked back. The rule now: the data records what I do; proposals stay labelled proposals until I confirm them.</li>
+      <li><strong>Who decides:</strong> I do. The review produces an agenda for my clinician, not a prescription. Anything symptomatic goes to the clinician, not the rules page. The AI sets no dose and changes no rule without sign-off.</li>
+      <li><strong>What the model sees:</strong> the plan data and the site's pages. What it never sees: logins and account secrets.</li>
     </ul>
-  </section>
+  </div></section>
 
-  <!-- 5 GRADERS -->
-  <section class="slide">
-    <span class="kicker">Pattern 3 · Review</span>
-    <h1 class="title serif">Four hostile <em>graders</em></h1>
+  <!-- 10 THIS WEEK -->
+  <section class="slide"><div class="inner">
+    <span class="kicker">This week</span>
+    <h1 class="title serif">Three things to <em>try</em></h1>
     <div class="rule"></div>
-    <p class="sub" style="max-width:70ch;">Each round, the AI builds, then plays four adversarial reviewers against its own work. Each has a veto in its own lane. Their job is to find what's wrong, not confirm what's right.</p>
-    <div class="cards four" style="margin-top:18px;">
-      <div class="card"><div class="cl">Usability</div><div class="cn">Me at 6am, on a phone, mid-set, cold hands</div><div class="cd">Can I find today's protocol in one tap? Log a set without losing my place? Is anything important below three scrolls?</div></div>
-      <div class="card"><div class="cl">Style</div><div class="cn">A designer who has seen 10,000 dark dashboards</div><div class="cd">Does the density read as considered or dumped? Does anything look like a default?</div></div>
-      <div class="card"><div class="cl">Domain skeptic</div><div class="cn">A coach who thinks most of this is expensive urine</div><div class="cd">Is every claim traceable to the source sheet? Is a C-grade claim presented with the confidence of an A?</div></div>
-      <div class="card"><div class="cl">Domain expert</div><div class="cn">Someone who knows the literature's failure modes</div><div class="cd">Is animal data dressed as human data? Can a reader mistake an intention for a practice?</div></div>
-    </div>
-    <div class="tags">
-      <span class="tag">Minimum five rounds. It ran eleven.</span>
-      <span class="tag">A grader that reports nothing is a failed grader, not a passed build</span>
-      <span class="tag">Findings carry forward until closed by a fix or a refusal the grader accepts</span>
-    </div>
-  </section>
-
-  <!-- 6 RUBRIC GROWS -->
-  <section class="slide">
-    <span class="kicker">Pattern 4 · Learning</span>
-    <h1 class="title serif">The rubric is a <em>deliverable</em> too</h1>
-    <div class="rule"></div>
-    <p class="sub" style="max-width:70ch;">Anything a grader found that the rubric did not anticipate got added to the rubric, not just fixed. Some of the rules it wrote about itself:</p>
-    <div class="rules" style="margin-top:14px;">
-      <div class="rl"><div class="rh">A test that asserts presence is not a safety test.</div><div class="rd">132 safety flags could be inverted without changing a byte of any page or failing any check. Tests now assert consequences.</div></div>
-      <div class="rl"><div class="rh">Verification scope is part of the claim.</div><div class="rd">A tool printed CLEAN over a file it had never looked at. Every check now names what it read.</div></div>
-      <div class="rl"><div class="rh">A sweep that cannot fail anything is not a check.</div><div class="rd">A full scan sat behind a flag nothing ever passed, and its result never fed the verdict.</div></div>
-      <div class="rl"><div class="rh">"Did this resolve" needs a partner: "into what."</div><div class="rd">A placeholder resolved into garbage and shipped on every page for a full round, inside the fix meant to prevent it.</div></div>
-      <div class="rl"><div class="rh">Every absence is named, or none is.</div><div class="rd">Four gaps were labeled "not recorded." The fifth and largest was silent, so readers assumed a blank meant something.</div></div>
-      <div class="rl"><div class="rh">The deploy that is tested is the one that actually happens.</div><div class="rd">The test booted onto an empty disk, the one case that cannot fail. Real deploys boot onto yesterday's data.</div></div>
-    </div>
-  </section>
-
-  <!-- 7 TRUST -->
-  <section class="slide">
-    <span class="kicker">Pattern 5 · Boundaries</span>
-    <h1 class="title serif">Lines the AI can't talk its way <em>past</em></h1>
-    <div class="rule"></div>
-    <div class="cards">
-      <div class="card"><div class="cl">Two sites, one source</div><div class="cn">Private and public are built separately</div><div class="cd">The private site has everything, behind Google sign-in. The public subset was never rendered with private data. Nothing was filtered out, because it was never put in.</div></div>
-      <div class="card"><div class="cl">The scanner</div><div class="cn">Publish refuses if anything leaks</div><div class="cd">Every brand, dose, and product name is a blocked term, with an adversarial test per term. If the scan objects, nothing moves.</div></div>
-      <div class="card"><div class="cl">Provenance</div><div class="cn">Every number must prove itself</div><div class="cd">A tool perturbs each value in the data and checks the page moved. A number on a page with no source in the data fails the build.</div></div>
-    </div>
-    <div class="tags">
-      <span class="tag live">Live</span>
-      <span class="tag">Public site next to private site</span>
-      <span class="tag">The scanner catching a planted term</span>
-      <span class="tag">Standing rule: secrets never go into a chat window</span>
-    </div>
-  </section>
-
-  <!-- 8 WHAT BROKE -->
-  <section class="slide">
-    <div class="panel"></div><div class="ghost">!</div>
-    <span class="kicker">Honest round</span>
-    <h1 class="title serif">What broke <em>anyway</em></h1>
-    <div class="rule"></div>
-    <ul class="points">
-      <li><strong>One failed deploy, site down.</strong> My data file also held program structure. New code needed a field the live file could not have. The test suite had no idea, because it only tested a fresh install.</li>
-      <li><strong>One bug shipped inside its own fix.</strong> A CSS escape rendered as junk on every page for a full round, and the check that should have caught it only asked whether the placeholder resolved.</li>
-      <li><strong>The pattern:</strong> every miss was a check that looked like a check and could not fail. The graders found what I did not know to look for. Nothing found what nobody was looking for.</li>
-      <li><strong>The one thing still typed by hand:</strong> "82 minutes door to door." The build catches an impossible figure, not a merely wrong one.</li>
-    </ul>
-  </section>
-
-  <!-- 9 DURABILITY -->
-  <section class="slide">
-    <span class="kicker">The lens · Does it last?</span>
-    <h1 class="title serif">What survives a <em>cheaper model</em></h1>
-    <div class="rule"></div>
-    <div class="cards two">
-      <div class="card"><div class="cl">Gets stronger</div><div class="cn">The structure</div><div class="cd">Data I own, a rubric in plain English, graders described as people, checks that must be able to fail. None of it cares which model runs it. Cheaper tokens mean more rounds, not fewer.</div></div>
-      <div class="card"><div class="cl">Stays human</div><div class="cn">The judgment</div><div class="cd">Deciding what is a MUST. Writing the non-scope. Being the 6am usability grader. Knowing which refusal to accept. The AI did not write the rubric's first draft well.</div></div>
-    </div>
-    <div class="tags" style="margin-top:26px;">
-      <span class="tag">For the room: what's your equivalent of a hostile grader?</span>
-      <span class="tag">Where do you let the AI mark its own homework?</span>
-      <span class="tag">Is a rubric overkill for a one-person tool, or the only reason it worked?</span>
-    </div>
-  </section>
+    <ol class="rules">
+      <li>Run three opposed reviewers against one live document of yours. Template briefs: the experimenter who wants more, the efficiency expert who holds your time constant, the specialist who worries about what breaks.</li>
+      <li>Write the reversal condition for one decision you made this quarter, before the next data point arrives.</li>
+      <li>Grade your own spend, or your roadmap, A to D. Set the share of C and D you would accept. Then compare.</li>
+    </ol>
+    <div class="tags" style="margin-top:26px;"><span class="tag">For the room: what is the marker that would make you stop something you like?</span></div>
+  </div></section>
 
 </div>
 
 <div class="nav">
   <button id="prev" aria-label="Previous">&larr;</button>
   <div class="dots" id="dots"></div>
-  <span class="count" id="count">1 / 9</span>
+  <span class="count" id="count">1 / 10</span>
   <button id="next" aria-label="Next">&rarr;</button>
 </div>
-<div class="hint">← → or space to advance</div>
+<div class="hint">← → or space to advance · scroll within a slide</div>
 
 <script>
   const slides = Array.from(document.querySelectorAll('.slide'));
@@ -269,7 +257,7 @@
   const dots = Array.from(document.querySelectorAll('.dot'));
   function go(n){
     i = Math.max(0, Math.min(slides.length - 1, n));
-    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    slides.forEach((s, k) => { s.classList.toggle('active', k === i); if (k === i) s.scrollTop = 0; });
     dots.forEach((d, k) => d.classList.toggle('on', k === i));
     count.textContent = (i + 1) + ' / ' + slides.length;
     prevB.disabled = (i === 0);
